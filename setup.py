@@ -5,9 +5,10 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
         name='pinplot',
-        version='0.1.0',
+        version='0.1.0.post1',
         author='neophyliam',
         author_email='neophyliam@gmail.com',
+        url='https://github.com/Neophyliam/pinplot',
         description='A simple tool for plotting pins '
                 'in lattice of a nuclear reactor.',
         long_description=long_description,
