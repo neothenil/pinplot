@@ -50,17 +50,27 @@ def _get_wedges_colors(pin, center=(0, 0)):
     return wedges, colors
 
 
-def plot_pin(pin, *, to_file=None, dpi=600):
+def plot_pin(pin, *, to_file=None, dpi=600, facecolor="blue", color_offset=0.):
+    ax_size = max(pin.radii) + 0.1*max(pin.radii)
     wedges, colors = _get_wedges_colors(pin)
+    if color_offset:
+        max_value = max(colors)
+        min_value = min(colors)
+        wedges.append(Wedge(center=(ax_size*10, ax_size*10), r=0.01,
+                            theta1=0, theta2=360))
+        if color_offset > 0:
+            colors.append(min_value-(max_value-min_value)*color_offset)
+        else:
+            colors.append(max_value-(max_value-min_value)*color_offset)
     p = PatchCollection(wedges, cmap=pcm.jet, alpha=1.0, edgecolor="None",
                         linewidth=0.0)
     p.set_array(np.array(colors))
 
     fig, ax = plt.subplots()
-    fig.set_facecolor("blue")
+    fig.set_facecolor(facecolor)
     ax.add_collection(p)
-    plt.colorbar(p, shrink=0.8, extend="neither", extendfrac=0.0, format="$%.3f$")
-    ax_size = max(pin.radii) + 0.1*max(pin.radii)
+    plt.colorbar(p, shrink=0.8, extend="neither",
+                 extendfrac=0.0, format="$%.3f$")
     plt.ylim(-ax_size, ax_size)
     plt.xlim(-ax_size, ax_size)
     plt.axis("off")
@@ -71,9 +81,12 @@ def plot_pin(pin, *, to_file=None, dpi=600):
         plt.show()
 
 
-def plot_pins(pins, pitch, *, to_file=None, dpi=600):
+def plot_pins(pins, pitch, *, to_file=None, dpi=600, facecolor="blue",
+              color_offset=0.):
     row_num = len(pins)
     column_num = len(pins[0])
+    ax_size = max(((row_num-1)*pitch+pitch/2.0,
+                  (column_num-1)*pitch+pitch/2.0))
     all_wedges = []
     all_colors = []
     for i in range(row_num):
@@ -86,15 +99,24 @@ def plot_pins(pins, pitch, *, to_file=None, dpi=600):
             wedges, colors = _get_wedges_colors(pins[i][j], center)
             all_wedges += wedges
             all_colors += colors
+    if color_offset:
+        max_value = max(all_colors)
+        min_value = min(all_colors)
+        all_wedges.append(Wedge(center=(-ax_size, -ax_size), r=0.01,
+                            theta1=0, theta2=360))
+        if color_offset > 0:
+            all_colors.append(min_value-(max_value-min_value)*color_offset)
+        else:
+            all_colors.append(max_value-(max_value-min_value)*color_offset)
     p = PatchCollection(all_wedges, cmap=pcm.jet, alpha=1.0, edgecolor="None",
                         linewidth=0.0)
     p.set_array(np.array(all_colors))
 
     fig, ax = plt.subplots()
-    fig.set_facecolor("blue")
+    fig.set_facecolor(facecolor)
     ax.add_collection(p)
-    plt.colorbar(p, shrink=0.8, extend="neither", extendfrac=0.0, format="$%.3f$")
-    ax_size = max(((row_num-1)*pitch+pitch/2.0, (column_num-1)*pitch+pitch/2.0))
+    plt.colorbar(p, shrink=0.8, extend="neither",
+                 extendfrac=0.0, format="$%.3f$")
     plt.ylim(-pitch/2.0, ax_size)
     plt.xlim(-pitch/2.0, ax_size)
     plt.axis("off")
@@ -114,4 +136,5 @@ if __name__ == "__main__":
     pin4 = Pin(radii, thetas, range(60, 80))
     pins = [[pin1, pin3],
             [None, pin4]]
-    plot_pins(pins, 1.26)
+    plot_pins(pins, 1.26, color_offset=-1.0)
+    plot_pin(pin1, color_offset=-1.0)
